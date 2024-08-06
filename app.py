@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, StringVar, OptionMenu
 import requests
 from PIL import Image, ImageTk
 
@@ -13,9 +13,16 @@ def get_weather():
         if weather_api_request.json()['cod'] == '404':
             messagebox.showerror("Invalid City credentials")
         else:
-            weather_info = (f"The weather in {city} is {weather_api_request.json()['main']['temp']}F, described by: "
-                            f"{weather_api_request.json()['weather'][0]['description']}")
-            weather_label.config(text=weather_info)
+            if selected_option.get() == options[0]:
+                weather_info = (f"The weather in {city} is {weather_api_request.json()['main']['temp']}F, described by: "
+                                f"{weather_api_request.json()['weather'][0]['description']}")
+                weather_label.config(text=weather_info)
+            if selected_option.get() == options[1]:
+                convert = (weather_api_request.json()['main']['temp'] - 32) * 5/9
+                weather_info = (
+                    f"The weather in {city} is {convert:.2f} Celsius, described by: "
+                    f"{weather_api_request.json()['weather'][0]['description']}")
+                weather_label.config(text=weather_info)
     except Exception as e:
         messagebox.showerror("Error", str(e))
 
@@ -34,6 +41,13 @@ image_label.pack(pady=10)
 tk.Label(root, text="Enter a City").pack(pady=10)
 city_input = tk.Entry(root)
 city_input.pack(pady=5)
+
+#dropdown_menu
+options = ["Fahrenheit", "Celsius"]
+selected_option = StringVar(root)
+selected_option.set(options[0])
+dropdown = OptionMenu(root, selected_option, *options)
+dropdown.pack(pady=5)
 
 #Button
 tk.Button(root, text="Get Weather", command=get_weather).pack(pady=10)
